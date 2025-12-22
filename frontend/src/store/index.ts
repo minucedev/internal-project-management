@@ -9,6 +9,8 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
+import { useDispatch, useSelector } from 'react-redux';
+import type { TypedUseSelectorHook } from 'react-redux';
 import authReducer from './slices/authSlice';
 import env from '../config/env';
 
@@ -41,7 +43,5 @@ export type AppDispatch = typeof store.dispatch;
  * Type-safe hooks for use throughout the app
  * Use these instead of plain `useDispatch` and `useSelector`
  */
-import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

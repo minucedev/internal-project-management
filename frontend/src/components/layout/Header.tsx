@@ -52,24 +52,12 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header
-      style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '16px 24px',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}
-    >
+    <header className="bg-gradient-primary py-4 px-6 shadow-card flex justify-between items-center">
       {/* Left side - App title */}
       <div>
         <Text
           strong
-          style={{
-            fontSize: '20px',
-            color: '#fff',
-          }}
+          className="text-xl text-white"
         >
           Internal Project Management
         </Text>
@@ -80,8 +68,8 @@ export const Header: React.FC = () => {
         {currentUser && (
           <>
             <Space>
-              <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#fff', color: '#764ba2' }} />
-              <Text style={{ color: '#fff', fontWeight: 500 }}>
+              <Avatar icon={<UserOutlined />} className="bg-white text-secondary-600" />
+              <Text className="text-white font-medium">
                 {currentUser.username}
               </Text>
             </Space>
@@ -89,11 +77,7 @@ export const Header: React.FC = () => {
               type="default"
               icon={<LogoutOutlined />}
               onClick={handleLogout}
-              style={{
-                background: 'rgba(255, 255, 255, 0.2)',
-                color: '#fff',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-              }}
+              className="bg-white bg-opacity-20 text-white border border-white border-opacity-30 hover:bg-opacity-30"
             >
               Logout
             </Button>

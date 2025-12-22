@@ -39,12 +39,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // This prevents flashing login page during initial app load
   if (isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '100vh' 
-      }}>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-primary">
         <Spin size="large" tip="Checking authentication..." />
       </div>
     );

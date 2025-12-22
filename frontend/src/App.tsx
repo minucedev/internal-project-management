@@ -29,9 +29,9 @@ import './App.css';
 const DashboardPage = () => (
   <div>
     <Header />
-    <div style={{ padding: '24px' }}>
-      <h1>Dashboard Page (To be implemented)</h1>
-      <p>Welcome to your dashboard. More features coming soon!</p>
+    <div className="p-8 max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold text-neutral-900 mb-4">Dashboard Page (To be implemented)</h1>
+      <p className="text-neutral-600">Welcome to your dashboard. More features coming soon!</p>
     </div>
   </div>
 );
@@ -97,13 +97,7 @@ function App() {
    */
   if (isInitializing) {
     return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      }}>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-primary">
         <Spin size="large" tip="Loading..." />
       </div>
     );

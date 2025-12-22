@@ -13,7 +13,8 @@
  * - Network Errors: Show connection error
  */
 
-import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios'; 
+import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import env from '../config/env';
 import { tokenService } from './tokenService';
 import type { ApiError } from '../types/auth.types';

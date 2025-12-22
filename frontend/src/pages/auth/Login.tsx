@@ -1,40 +1,37 @@
 /**
- * Login Page Component
+ * Login Page Component - Full Screen Web Layout
  * 
- * User login form with:
- * - Username input (required)
- * - Password input (required)
- * - Client-side validation
- * - Loading state during login
- * - Error handling for invalid credentials
- * - Successful login flow (save token, redirect to dashboard)
- * - Link to registration page
+ * Architecture:
+ * - Split into HeroSection (left) and LoginForm (right) components
+ * - Responsive design: 2-column on desktop, single column on mobile
+ * - Redux integration for authentication state management
  * - Return URL preservation for protected route redirects
  * 
- * Integrates with Redux authSlice for state management
+ * Features:
+ * - Auto-redirect after successful login
+ * - Error handling with alerts
+ * - Loading states
+ * - Mobile responsive (hide hero section)
  */
-
 import React, { useEffect } from 'react';
-import { Form, Input, Button, Typography, Card, Alert, Space, Checkbox, message } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { CheckCircleFilled } from '@ant-design/icons';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { message } from 'antd';
+import { useAppDispatch, useAppSelector } from '../../store';
 import { loginUser, clearError } from '../../store/slices/authSlice';
-import type { LoginCredentials } from '../../types/auth.types';
-import type { AppDispatch, RootState } from '../../store';
-
-const { Title, Text } = Typography;
+import HeroSection from '../../components/auth/HeroSection';
+import LoginForm from '../../components/auth/LoginForm';
+import type { LoginFormValues } from '../../components/auth/LoginForm';
 
 /**
  * Login Page Component
  */
 const Login: React.FC = () => {
-  const [form] = Form.useForm();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
-  const { isLoading, error, token } = useSelector((state: RootState) => state.auth);
+  const { isLoading, error, token } = useAppSelector((state) => state.auth);
 
   // Get return URL from query params (for protected route redirects)
   const returnUrl = searchParams.get('returnUrl') || '/dashboard';
@@ -63,13 +60,13 @@ const Login: React.FC = () => {
   /**
    * Handle form submission
    */
-  const handleSubmit = async (values: LoginCredentials & { remember?: boolean }) => {
+  const handleSubmit = async (values: LoginFormValues) => {
     try {
       // Clear any previous errors
       dispatch(clearError());
 
       // Dispatch loginUser thunk
-      const credentials: LoginCredentials = {
+      const credentials = {
         username: values.username,
         password: values.password,
       };
@@ -85,128 +82,38 @@ const Login: React.FC = () => {
     }
   };
 
+  /**
+   * Handle clear error
+   */
+  const handleClearError = () => {
+    dispatch(clearError());
+  };
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '20px 16px',
-    }}>
-      <Card
-        style={{
-          width: '100%',
-          minWidth: '320px',
-          maxWidth: '450px',
-          borderRadius: '12px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-        }}
-      >
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          {/* Header */}
-          <div style={{ textAlign: 'center' }}>
-            <Title level={2} style={{ marginBottom: 8 }}>
-              Welcome Back
-            </Title>
-            <Text type="secondary">
-              Sign in to your account
-            </Text>
+    <div className="min-h-screen grid lg:grid-cols-2 relative overflow-hidden">
+      {/* Left Side - Hero Section */}
+      <HeroSection />
+
+      {/* Right Side - Login Form */}
+      <div className="flex items-center justify-center p-8 bg-gradient-to-br from-neutral-50 to-white relative overflow-y-auto">
+        {/* Mobile Logo */}
+        <div className="absolute top-8 left-8 lg:hidden">
+          <div className="inline-flex items-center gap-2">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-primary">
+              <CheckCircleFilled className="text-xl text-white" />
+            </div>
+            <span className="text-xl font-bold text-neutral-900">TaskFlow</span>
           </div>
+        </div>
 
-          {/* Error Alert */}
-          {error && (
-            <Alert
-              message="Login Failed"
-              description={error}
-              type="error"
-              closable
-              onClose={() => dispatch(clearError())}
-              showIcon
-            />
-          )}
-
-          {/* Login Form */}
-          <Form
-            form={form}
-            name="login"
-            layout="vertical"
-            onFinish={handleSubmit}
-            autoComplete="on"
-            size="large"
-            initialValues={{ remember: true }}
-          >
-            {/* Username Field */}
-            <Form.Item
-              name="username"
-              label="Username"
-              rules={[
-                { required: true, message: 'Please enter your username' },
-                { min: 3, message: 'Username must be at least 3 characters' },
-              ]}
-            >
-              <Input
-                prefix={<UserOutlined />}
-                placeholder="Enter your username"
-                disabled={isLoading}
-                autoComplete="username"
-              />
-            </Form.Item>
-
-            {/* Password Field */}
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[
-                { required: true, message: 'Please enter your password' },
-              ]}
-            >
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="Enter your password"
-                disabled={isLoading}
-                autoComplete="current-password"
-              />
-            </Form.Item>
-
-            {/* Remember Me & Forgot Password */}
-            <Form.Item style={{ marginBottom: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Form.Item name="remember" valuePropName="checked" noStyle>
-                  <Checkbox disabled={isLoading}>Remember me</Checkbox>
-                </Form.Item>
-                <Text type="secondary" style={{ fontSize: '14px' }}>
-                  {/* Forgot password feature will be added in future phase */}
-                  Forgot password?
-                </Text>
-              </div>
-            </Form.Item>
-
-            {/* Submit Button */}
-            <Form.Item style={{ marginBottom: 0 }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={isLoading}
-                block
-                style={{ height: '48px', fontSize: '16px', fontWeight: 500 }}
-              >
-                {isLoading ? 'Signing in...' : 'Sign In'}
-              </Button>
-            </Form.Item>
-          </Form>
-
-          {/* Registration Link */}
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary">
-              Don't have an account?{' '}
-              <Link to="/register" style={{ fontWeight: 500 }}>
-                Create one now
-              </Link>
-            </Text>
-          </div>
-        </Space>
-      </Card>
+        {/* Login Form Component */}
+        <LoginForm
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          error={error}
+          onClearError={handleClearError}
+        />
+      </div>
     </div>
   );
 };

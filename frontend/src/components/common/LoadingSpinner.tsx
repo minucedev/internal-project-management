@@ -47,16 +47,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'large' 
 }) => {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      }}
-    >
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-primary">
       <Spin size={size} tip={tip} />
     </div>
   );
