@@ -1,7 +1,7 @@
 package com.internalpj.crm_mini.security.jwt;
 
-import com.internalpj.crm_mini.error.ErrorCode;
 import com.internalpj.crm_mini.error.ErrorResponse;
+import com.internalpj.crm_mini.error.enums.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

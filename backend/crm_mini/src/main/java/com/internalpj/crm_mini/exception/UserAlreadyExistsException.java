@@ -1,7 +1,7 @@
 package com.internalpj.crm_mini.exception;
 
 import com.internalpj.crm_mini.error.BusinessException;
-import com.internalpj.crm_mini.error.ErrorCode;
+import com.internalpj.crm_mini.error.enums.ErrorCode;
 
 public class UserAlreadyExistsException extends BusinessException {
 

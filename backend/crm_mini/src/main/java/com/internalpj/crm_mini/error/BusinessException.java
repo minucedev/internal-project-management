@@ -1,5 +1,7 @@
 package com.internalpj.crm_mini.error;
 
+import com.internalpj.crm_mini.error.enums.ErrorCode;
+
 public class BusinessException extends RuntimeException{
     private ErrorCode errorCode;
 

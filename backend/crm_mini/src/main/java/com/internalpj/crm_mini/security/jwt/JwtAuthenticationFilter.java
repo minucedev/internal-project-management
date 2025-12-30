@@ -1,5 +1,6 @@
 package com.internalpj.crm_mini.security.jwt;
 
+import com.internalpj.crm_mini.controller.auth.enums.RoleType;
 import com.internalpj.crm_mini.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,11 +43,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // Load user form DB
             userRepository.findById(userId).ifPresent(user -> {
-                // Generate authorities 
+                // Generate authorities
                 List<org.springframework.security.core.GrantedAuthority> authorities = Collections.singletonList(
                         new org.springframework.security.core.authority.SimpleGrantedAuthority(
-                                "ROLE_" + (user.getRoleId() == 1 ? "ADMIN" : "USER")));
-// Set authentication in SecurityContext
+                                user.getRole() != null ? RoleType.fromId(user.getRole().getId()).getRole()
+                                        : RoleType.USER.getRole())); // avoid null role
+                // Set authentication in SecurityContext
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         user,
                         null,

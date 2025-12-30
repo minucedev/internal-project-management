@@ -3,7 +3,6 @@ package com.internalpj.crm_mini.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -24,8 +23,10 @@ public class User {
     @Column(name = "password", nullable = false, length = 255, insertable = true, updatable = true)
     private String password;
 
-    @Column(name = "role_id", nullable = false)
-    private Integer roleId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
