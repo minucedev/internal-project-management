@@ -1,73 +1,62 @@
-# React + TypeScript + Vite
+# Auth Module
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📋 Overview
+Brief description of what this module does.
 
-Currently, two official plugins are available:
+## 🎯 Responsibilities
+- User registration
+- User login/logout
+- Token management
+- Protected routes
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🏗️ Structure
+\`\`\`
+auth/
+├── api/          # API calls
+├── components/   # UI components
+├── hooks/        # Custom hooks
+├── pages/        # Page components
+├── stores/       # State management
+├── types/        # TypeScript types
+└── utils/        # Utilities
+\`\`\`
 
-## React Compiler
+## 🔌 Public API
+\`\`\`typescript
+// Components
+export { LoginForm, RegisterForm } from './components';
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+// Hooks
+export { useAuth, useLogin, useRegister } from './hooks';
 
-## Expanding the ESLint configuration
+// Store
+export { useAuthStore } from './stores';
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+// Types
+export type { LoginRequest, RegisterRequest, User } from './types';
+\`\`\`
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 Usage Examples
+\`\`\`typescript
+// Using login form
+import { LoginForm } from '@/features/auth';
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+function LoginPage() {
+  return <LoginForm />;
+}
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+// Using auth hook
+import { useAuth } from '@/features/auth';
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+function Dashboard() {
+  const { user, logout } = useAuth();
+  
+  return <div>Welcome {user.username}</div>;
+}
+\`\`\`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🧪 Testing
+How to run tests for this module.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📝 Notes
+Any important notes or gotchas.
