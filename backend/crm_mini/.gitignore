@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Environment Variables (DO NOT COMMIT)
+.env
+.env.local
+.env.production
+# .env.example should be committed as template
