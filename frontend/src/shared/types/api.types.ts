@@ -1,6 +1,26 @@
+/**
+ * Backend error response format
+ * Matches the ErrorResponse class from backend
+ */
+export interface BackendErrorResponse {
+  code: string;
+  message: string;
+  timestamp: string;
+}
+
+/**
+ * Generic API response wrapper
+ * Supports both success responses and backend error format
+ */
 export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
+  // Success response fields
+  success?: boolean;
+  data?: T;
+  // Backend error response fields
+  code?: string;
+  message?: string;
+  timestamp?: string;
+  // Legacy error format (kept for backwards compatibility)
   error?: {
     message: string;
     status: number;
@@ -30,3 +50,4 @@ export interface PaginationParams {
   sort?: string;
   order?: 'asc' | 'desc';
 }
+

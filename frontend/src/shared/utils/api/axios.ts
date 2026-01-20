@@ -2,7 +2,6 @@ import axios, { AxiosError } from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
 import { env } from '@/config/env';
 import { storage } from '../storage';
-import { getErrorMessage } from './errorHandler';
 import { toast } from 'react-hot-toast';
 
 const axiosInstance = axios.create({
@@ -35,8 +34,7 @@ axiosInstance.interceptors.response.use(
   async (error: AxiosError) => {
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
-      // Clear token and redirect to login if needed
-      // In a real app, you might try to refresh the token here
+      // Clear token and redirect to login
       storage.clearToken();
       window.location.href = '/login';
       return Promise.reject(error);
@@ -44,16 +42,12 @@ axiosInstance.interceptors.response.use(
 
     // Handle Network Errors
     if (error.code === 'ERR_NETWORK') {
-      toast.error('Network error. Please check your connection.');
+      toast.error('Lỗi kết nối. Vui lòng kiểm tra mạng của bạn.');
       return Promise.reject(error);
     }
 
-    // Handle other errors
-    const message = getErrorMessage(error);
-    // Optional: Show toast for all errors or let components handle it
-    // toast.error(message); 
-    
-    return Promise.reject(new Error(message));
+    // Let components handle other errors with getErrorMessage
+    return Promise.reject(error);
   }
 );
 
