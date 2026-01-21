@@ -4,25 +4,29 @@ import { storage, STORAGE_KEYS } from '@/shared/utils/storage';
 import { isTokenExpired } from '@/features/auth/utils/token';
 
 interface AuthStore extends AuthState {
-  setAuth: (user: User, token: string) => void;
+  setAuth: (user: User, token: string, refreshToken: string) => void;
   clearAuth: () => void;
   setLoading: (isLoading: boolean) => void;
   initializeAuth: () => void;
   updateUser: (updates: Partial<User>) => void;
+  updateTokens: (accessToken: string, refreshToken?: string) => void;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   token: null,
+  refreshToken: null,
   isAuthenticated: false,
   isLoading: true,
 
-  setAuth: (user: User, token: string) => {
+  setAuth: (user: User, token: string, refreshToken: string) => {
     storage.setToken(token);
+    storage.setRefreshToken(refreshToken);
     storage.setItem(STORAGE_KEYS.USER, user);
     set({
       user,
       token,
+      refreshToken,
       isAuthenticated: true,
       isLoading: false,
     });
@@ -34,6 +38,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({
       user: null,
       token: null,
+      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
     });
@@ -45,12 +50,24 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   initializeAuth: () => {
     const token = storage.getToken();
+    const refreshToken = storage.getRefreshToken();
     const user = storage.getItem<User>(STORAGE_KEYS.USER);
 
     if (token && user && !isTokenExpired(token)) {
       set({
         user,
         token,
+        refreshToken,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } else if (refreshToken && user) {
+      // Access token expired but we have refresh token - still consider authenticated
+      // The axios interceptor will handle token refresh on next API call
+      set({
+        user,
+        token,
+        refreshToken,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -58,6 +75,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({
         user: null,
         token: null,
+        refreshToken: null,
         isAuthenticated: false,
         isLoading: false,
       });
@@ -72,4 +90,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
       return { user: updatedUser };
     });
   },
+
+  updateTokens: (accessToken: string, refreshToken?: string) => {
+    storage.setToken(accessToken);
+    if (refreshToken) {
+      storage.setRefreshToken(refreshToken);
+    }
+    set((state) => ({
+      token: accessToken,
+      refreshToken: refreshToken ?? state.refreshToken,
+    }));
+  },
 }));
+
