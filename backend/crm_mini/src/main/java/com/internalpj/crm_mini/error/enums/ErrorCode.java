@@ -12,8 +12,9 @@ public enum ErrorCode {
     UNAUTHORIZED("AUTH_001", "Unauthorized"),
     FORBIDDEN("AUTH_002", "Forbidden"),
     ROLE_NOT_FOUND("ROLE_NOT_FOUND", "ID not existed"),
-    VALIDATION_ERROR("VALIDATION_ERROR", "Invalid input data"), 
-
+    VALIDATION_ERROR("VALIDATION_ERROR", "Invalid input data"),
+    REFRESH_TOKEN_NOT_FOUND("REFRESH_TOKEN_NOT_FOUND", "Refresh token not found"),
+    INVALID_TOKEN("INVALID_TOKEN","Refresh token is invalid or has been tampered with."),
 
     // === SYSTEM ===
     INTERNAL_ERROR("INTERNAL_ERROR", "Internal server error");
