@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -22,6 +23,10 @@ public class User {
 
     @Column(name = "password", nullable = false, length = 255, insertable = true, updatable = true)
     private String password;
+
+    // Auto delete related refresh tokens when user is deleted
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RefreshToken> tokens;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false)
