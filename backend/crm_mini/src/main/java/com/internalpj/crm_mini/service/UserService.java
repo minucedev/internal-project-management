@@ -22,13 +22,15 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
+            PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider, RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
     }
@@ -46,8 +48,8 @@ public class UserService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         User newUser = new User();
-        
-        Integer roleId = request.getRoleID() != null ? request.getRoleID(): RoleType.USER.getId();
+
+        Integer roleId = request.getRoleID() != null ? request.getRoleID() : RoleType.USER.getId();
 
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
@@ -70,13 +72,15 @@ public class UserService {
             throw new InvalidCredentialsException();
         }
 
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail());
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());
+        String refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
         return new LoginResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                token);
+                accessToken,
+                refreshToken);
     }
 
     public boolean verifyPassword(String rawPassword, String encodedPassword) {

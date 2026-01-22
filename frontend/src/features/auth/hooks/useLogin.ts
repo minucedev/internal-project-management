@@ -22,7 +22,7 @@ export const useLogin = () => {
         email: response.email,
       };
       
-      setAuth(user, response.accessToken);
+      setAuth(user, response.accessToken, response.refreshToken);
       toast.success(AUTH_MESSAGES.LOGIN_SUCCESS);
       navigate(APP_ROUTES.DASHBOARD.ROOT);
     },

@@ -16,6 +16,7 @@ export interface LoginResponse {
   username: string;
   email: string;
   accessToken: string;
+  refreshToken: string;
 }
 
 export interface User {
@@ -31,6 +32,7 @@ export interface User {
 export interface AuthState {
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 }

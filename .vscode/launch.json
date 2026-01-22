@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-CrmMiniApplication<crm_mini>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.internalpj.crm_mini.CrmMiniApplication",
+            "projectName": "crm_mini",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

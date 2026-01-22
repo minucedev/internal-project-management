@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.time.Instant;
 
 @Component
 public class JwtTokenProvider {
@@ -22,6 +23,9 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private long expiration;
 
+    @Value("${jwt.refresh-expiration}")
+    private long refreshExpiration;
+
     private Key key;
 
     @PostConstruct
@@ -30,15 +34,29 @@ public class JwtTokenProvider {
     }
 
     // Generate token
-    public String generateToken(Long userId, String email) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration);
+    public String generateAccessToken(Long userId, String email) {
+        Instant now = Instant.now();
+        Instant expiryInstant = now.plusMillis(expiration);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("email", email)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(expiryInstant))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // Generate refresh token
+    public String generateRefreshToken(Long userId) {
+        Instant now = Instant.now();
+        Instant expiryInstant = now.plusMillis(refreshExpiration);
+
+        return Jwts.builder()
+                .setSubject(String.valueOf(userId))
+                .claim("type", "refresh")
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(expiryInstant))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
