@@ -19,4 +19,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.id = ?1 AND u.deletedAt IS NULL")
     Optional<User> findById(Long id);
 
+    /**
+     * Find user by email, excluding soft-deleted users.
+     * Used for adding members to projects by email.
+     */
+    @Query("SELECT u FROM User u WHERE u.email = ?1 AND u.deletedAt IS NULL")
+    Optional<User> findByEmailAndDeletedAtIsNull(String email);
+
+    /**
+     * Find user by username, excluding soft-deleted users.
+     */
+    @Query("SELECT u FROM User u WHERE u.username = ?1 AND u.deletedAt IS NULL")
+    Optional<User> findByUsernameAndDeletedAtIsNull(String username);
+
 }
+
