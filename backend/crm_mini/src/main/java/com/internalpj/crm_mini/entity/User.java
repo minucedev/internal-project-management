@@ -1,12 +1,17 @@
 package com.internalpj.crm_mini.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@ToString(exclude = { "tokens", "role", "createdProjects", "projectMemberships" })
 @Entity
 @NoArgsConstructor
 @Table(name = "users")
@@ -24,6 +29,9 @@ public class User {
     @Column(name = "password", nullable = false, length = 255, insertable = true, updatable = true)
     private String password;
 
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+
     // Auto delete related refresh tokens when user is deleted
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RefreshToken> tokens;
@@ -32,6 +40,13 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    // Projects created by this user
+    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
+    private List<Project> createdProjects;
+
+    // Project memberships
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProjectUser> projectMemberships;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

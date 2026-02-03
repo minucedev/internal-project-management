@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -34,15 +36,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
+
+        String requestURI = request.getRequestURI();
+        log.debug("Processing request: {} {}", request.getMethod(), requestURI);
+
         // Get token from header
         String token = getTokenFromRequest(request);
 
+        if (token != null) {
+            log.debug("Token found in request for URI: {}", requestURI);
+        } else {
+            log.debug("No token found in request for URI: {}", requestURI);
+        }
+
         // Validate token
         if (token != null && jwtTokenProvider.validateToken(token)) {
+            log.debug("Token is valid");
             Long userId = jwtTokenProvider.getUserIdFromToken(token);
+            log.debug("Extracted userId from token: {}", userId);
 
             // Load user form DB
             userRepository.findById(userId).ifPresent(user -> {
+                log.debug("User found in database: {} (id: {})", user.getEmail(), user.getId());
                 // Generate authorities
                 List<org.springframework.security.core.GrantedAuthority> authorities = Collections.singletonList(
                         new org.springframework.security.core.authority.SimpleGrantedAuthority(
@@ -55,7 +70,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("Authentication set in SecurityContext for user: {}", user.getEmail());
             });
+
+            if (userRepository.findById(userId).isEmpty()) {
+                log.warn("User with id {} not found in database", userId);
+            }
+        } else if (token != null) {
+            log.warn("Invalid token for URI: {}", requestURI);
         }
 
         filterChain.doFilter(request, response);

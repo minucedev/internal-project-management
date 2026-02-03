@@ -5,6 +5,7 @@ import com.internalpj.crm_mini.error.enums.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 
+@Slf4j
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private final ObjectMapper objectMapper;
@@ -28,6 +30,17 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException authException) throws IOException {
+
+        String requestURI = request.getRequestURI();
+        String authHeader = request.getHeader("Authorization");
+
+        log.warn("Authentication failed for request: {} {}", request.getMethod(), requestURI);
+        log.warn("Authorization header present: {}", authHeader != null);
+        if (authHeader != null) {
+            log.warn("Authorization header value: {}",
+                    authHeader.substring(0, Math.min(20, authHeader.length())) + "...");
+        }
+        log.warn("Authentication exception: {}", authException.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
                 ErrorCode.UNAUTHORIZED.getCode(),
