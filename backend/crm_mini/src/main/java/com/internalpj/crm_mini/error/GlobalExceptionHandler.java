@@ -1,6 +1,5 @@
 package com.internalpj.crm_mini.error;
 
-import com.internalpj.crm_mini.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,109 +17,52 @@ import java.util.stream.Collectors;
 /**
  * Global exception handler for all REST API endpoints.
  * Provides consistent error responses across the application.
+ * 
+ * All business exceptions are handled through the unified BusinessException
+ * handler,
+ * which automatically maps ErrorCode to appropriate HTTP status codes.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
         private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-        // ==================== Custom Project Management Exceptions
-        // ====================
+        // ==================== Business Exception Handler ====================
 
         /**
-         * Handle NotFoundException (404).
-         */
-        @ExceptionHandler(NotFoundException.class)
-        public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
-                logger.warn("Resource not found: {}", ex.getMessage());
-
-                ErrorResponse response = new ErrorResponse(
-                                "NOT_FOUND",
-                                ex.getMessage(),
-                                LocalDate.now());
-
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-
-        /**
-         * Handle ForbiddenException (403).
-         */
-        @ExceptionHandler(ForbiddenException.class)
-        public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException ex) {
-                logger.warn("Access forbidden: {}", ex.getMessage());
-
-                ErrorResponse response = new ErrorResponse(
-                                "FORBIDDEN",
-                                ex.getMessage(),
-                                LocalDate.now());
-
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-        }
-
-        /**
-         * Handle ConflictException (409).
-         */
-        @ExceptionHandler(ConflictException.class)
-        public ResponseEntity<ErrorResponse> handleConflictException(ConflictException ex) {
-                logger.warn("Conflict occurred: {}", ex.getMessage());
-
-                ErrorResponse response = new ErrorResponse(
-                                "CONFLICT",
-                                ex.getMessage(),
-                                LocalDate.now());
-
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        }
-
-        /**
-         * Handle BadRequestException (400).
-         */
-        @ExceptionHandler(BadRequestException.class)
-        public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {
-                logger.warn("Bad request: {}", ex.getMessage());
-
-                ErrorResponse response = new ErrorResponse(
-                                "BAD_REQUEST",
-                                ex.getMessage(),
-                                LocalDate.now());
-
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
-
-        /**
-         * Handle UnauthorizedException (401).
-         */
-        @ExceptionHandler(UnauthorizedException.class)
-        public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
-                logger.warn("Unauthorized access attempt: {}", ex.getMessage());
-
-                ErrorResponse response = new ErrorResponse(
-                                "UNAUTHORIZED",
-                                ex.getMessage(),
-                                LocalDate.now());
-
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-
-        // ==================== Existing Exception Handlers ====================
-
-        /**
-         * Handle BusinessException (existing).
+         * Handles all BusinessException instances (including subclasses).
+         * Automatically maps ErrorCode to appropriate HTTP status code.
+         * 
+         * This single handler replaces individual handlers for:
+         * - NotFoundException (404)
+         * - ForbiddenException (403)
+         * - ConflictException (409)
+         * - BadRequestException (400)
+         * - UnauthorizedException (401)
          */
         @ExceptionHandler(BusinessException.class)
         public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
-                logger.warn("Business exception occurred: {} - {}",
-                                ex.getErrorCode().getCode(),
-                                ex.getErrorCode().getMessage());
-
                 ErrorCode errorCode = ex.getErrorCode();
+                HttpStatus httpStatus = ex.getHttpStatus();
+
+                // Log with appropriate level based on status
+                if (httpStatus.is5xxServerError()) {
+                        logger.error("Business exception occurred: {} - {}",
+                                        errorCode.getCode(), ex.getMessage(), ex);
+                } else {
+                        logger.warn("Business exception occurred: {} - {}",
+                                        errorCode.getCode(), ex.getMessage());
+                }
+
                 ErrorResponse response = new ErrorResponse(
                                 errorCode.getCode(),
-                                errorCode.getMessage(),
+                                ex.getMessage(), // Use actual exception message (may be customized)
                                 LocalDate.now());
 
-                return ResponseEntity.badRequest().body(response);
+                return ResponseEntity.status(httpStatus).body(response);
         }
+
+        // ==================== Validation Exception Handler ====================
 
         /**
          * Handle validation errors from @Valid annotations.
@@ -138,15 +80,18 @@ public class GlobalExceptionHandler {
                 logger.warn("Validation failed: {}", message);
 
                 ErrorResponse response = new ErrorResponse(
-                                "VALIDATION_ERROR",
+                                ErrorCode.VALIDATION_ERROR.getCode(),
                                 message,
                                 LocalDate.now());
 
-                return ResponseEntity.badRequest().body(response);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
+
+        // ==================== System Exception Handler ====================
 
         /**
          * Handle all other unexpected exceptions.
+         * This is the catch-all handler for any unhandled exceptions.
          */
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ErrorResponse> handleSystemException(Exception ex) {

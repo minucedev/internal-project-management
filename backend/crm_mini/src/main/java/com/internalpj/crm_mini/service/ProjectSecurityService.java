@@ -32,7 +32,7 @@ public class ProjectSecurityService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ForbiddenException("User is not authenticated");
+            throw ForbiddenException.notAuthenticated();
         }
 
         Object principal = authentication.getPrincipal();
@@ -53,7 +53,7 @@ public class ProjectSecurityService {
         try {
             return Long.parseLong(principal.toString());
         } catch (NumberFormatException e) {
-            throw new ForbiddenException("Invalid user authentication");
+            throw ForbiddenException.invalidUserAuthentication();
         }
     }
 
@@ -100,7 +100,7 @@ public class ProjectSecurityService {
      */
     public ProjectRole getUserRoleInProject(Long projectId, Long userId) {
         return projectUserRepository.findRoleByProjectIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new NotFoundException("User is not a member of this project"));
+                .orElseThrow(() -> NotFoundException.member());
     }
 
     /**
@@ -113,7 +113,7 @@ public class ProjectSecurityService {
         boolean exists = projectRepository.existsByIdAndDeletedAtIsNull(projectId);
 
         if (!exists) {
-            throw new NotFoundException("Project", projectId);
+            throw NotFoundException.project(projectId);
         }
     }
 

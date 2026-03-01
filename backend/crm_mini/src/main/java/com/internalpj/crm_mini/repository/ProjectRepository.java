@@ -1,7 +1,7 @@
 package com.internalpj.crm_mini.repository;
 
-import com.internalpj.crm_mini.entity.Project;
-import com.internalpj.crm_mini.entity.User;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.internalpj.crm_mini.entity.Project;
+import com.internalpj.crm_mini.entity.User;
 
 /**
  * Repository interface for Project entity.
@@ -111,6 +112,40 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
                         "AND p.deletedAt IS NOT NULL " +
                         "ORDER BY p.deletedAt DESC")
         java.util.List<Project> findTrashedProjectsByLeaderId(@Param("userId") Long userId);
+
+        /**
+         * Find trashed projects where user is a LEADER with member count.
+         * Returns projects with member count to avoid N+1 queries.
+         * 
+         * @param userId the user ID
+         * @return List of project summaries with member counts
+         */
+        @Query("SELECT p.id as projectId, p.name as name, p.description as description, " +
+                        "p.startDate as startDate, p.endDate as endDate, " +
+                        "p.createdAt as createdAt, p.updatedAt as updatedAt, p.deletedAt as deletedAt, " +
+                        "COUNT(pu2) as memberCount " +
+                        "FROM Project p " +
+                        "JOIN p.projectUsers pu ON pu.id.userId = :userId AND pu.roleInProject = 'LEADER' " +
+                        "LEFT JOIN p.projectUsers pu2 ON pu2.statusInProject = 'ACTIVE' " +
+                        "WHERE p.deletedAt IS NOT NULL " +
+                        "GROUP BY p.id, p.name, p.description, p.startDate, p.endDate, p.createdAt, p.updatedAt, p.deletedAt " +
+                        "ORDER BY p.deletedAt DESC")
+        java.util.List<TrashedProjectSummary> findTrashedProjectsWithMemberCount(@Param("userId") Long userId);
+
+        /**
+         * Projection interface for trashed project summaries with member count.
+         */
+        interface TrashedProjectSummary {
+                Long getProjectId();
+                String getName();
+                String getDescription();
+                java.time.LocalDateTime getStartDate();
+                java.time.LocalDateTime getEndDate();
+                java.time.LocalDateTime getCreatedAt();
+                java.time.LocalDateTime getUpdatedAt();
+                java.time.LocalDateTime getDeletedAt();
+                Long getMemberCount();
+        }
 
         /**
          * Find projects deleted before a certain date.
