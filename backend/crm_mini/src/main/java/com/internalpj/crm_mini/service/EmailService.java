@@ -36,12 +36,13 @@ public class EmailService {
      *
      * @param to          recipient email
      * @param projectName name of the project
+     * @param projectId   ID of the project
      * @param token       invitation token
      */
     @Async
-    public void sendInviteEmail(String to, String projectName, String token) {
+    public void sendInviteEmail(String to, String projectName, Long projectId, String token) {
         try {
-            String inviteUrl = frontendUrl + "/invites/" + token;
+            String inviteUrl = frontendUrl + "/dashboard/projects/" + projectId + "/invites/" + token;
 
             // Build Thymeleaf context with template variables
             Context ctx = new Context();

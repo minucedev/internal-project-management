@@ -50,14 +50,23 @@ export const projectsApi = {
     await axiosInstance.delete(API_ENDPOINTS.PROJECTS.DETAIL(id));
   },
 
-  // Add member to project
+  // Add member to project (via email invitation)
   addMember: async (
     projectId: string,
     data: AddMemberRequest,
   ): Promise<ProjectMember> => {
-    const response = await axiosInstance.post<ApiResponse<ProjectMember>>(
-      API_ENDPOINTS.PROJECTS.MEMBERS(projectId),
+    // Note: To match BE, this returns an InviteResponse instead but for FE compatibility we'll type it correctly
+    const response = await axiosInstance.post<ApiResponse<any>>(
+      API_ENDPOINTS.PROJECTS.INVITE(projectId),
       data,
+    );
+    return response.data.data!;
+  },
+
+  // Accept invitation
+  acceptInvite: async (projectId: string, token: string): Promise<ProjectMember> => {
+    const response = await axiosInstance.post<ApiResponse<ProjectMember>>(
+      API_ENDPOINTS.PROJECTS.ACCEPT_INVITE(projectId, token),
     );
     return response.data.data!;
   },

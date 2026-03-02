@@ -110,7 +110,7 @@ public class MemberService {
         }
 
         // Send email
-        emailService.sendInviteEmail(userToInvite.getEmail(), project.getName(), token);
+        emailService.sendInviteEmail(userToInvite.getEmail(), project.getName(), projectId, token);
 
         log.info("Created invitation for {} to project {}", request.getEmail(), projectId);
 

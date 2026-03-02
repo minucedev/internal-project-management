@@ -15,6 +15,8 @@ export const API_ENDPOINTS = {
     BASE: '/projects',
     DETAIL: (id: string) => `/projects/${id}`,
     MEMBERS: (id: string) => `/projects/${id}/members`,
+    INVITE: (id: string) => `/projects/${id}/members/invite`,
+    ACCEPT_INVITE: (id: string, token: string) => `/projects/${id}/members/invites/${token}/accept`,
   },
   TASKS: {
     BASE: '/tasks',

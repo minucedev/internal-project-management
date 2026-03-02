@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { LoginPage, RegisterPage } from '@/features/auth';
-import { ProjectsPage, ProjectDetailPage } from '@/features/projects';
+import { ProjectsPage, ProjectDetailPage, AcceptInvitePage } from '@/features/projects';
 import { ProtectedRoute, PublicRoute } from '@/shared/components/navigation';
 import { DashboardLayout } from '@/layouts';
 import { APP_ROUTES } from '@/shared/constants';
@@ -46,6 +46,7 @@ export default function AppRoutes() {
           <Route path={APP_ROUTES.DASHBOARD.ROOT} element={<Navigate to={APP_ROUTES.DASHBOARD.PROJECTS} replace />} />
           <Route path={APP_ROUTES.DASHBOARD.PROJECTS} element={<ProjectsPage />} />
           <Route path={`${APP_ROUTES.DASHBOARD.PROJECTS}/:id`} element={<ProjectDetailPage />} />
+          <Route path={`${APP_ROUTES.DASHBOARD.PROJECTS}/:id/invites/:token`} element={<AcceptInvitePage />} />
           {/* TODO: Add Tasks, Calendar, Settings routes */}
         </Route>
       </Route>

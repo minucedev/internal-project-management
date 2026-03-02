@@ -5,3 +5,4 @@ export { useUpdateProject } from "./useUpdateProject";
 export { useDeleteProject } from "./useDeleteProject";
 export { useAddMember } from "./useAddMember";
 export { useRemoveMember } from "./useRemoveMember";
+export { useAcceptInvite } from "./useAcceptInvite";
