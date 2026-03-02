@@ -1,25 +1,9 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { LoginPage, RegisterPage } from '@/features/auth';
+import { ProjectsPage, ProjectDetailPage } from '@/features/projects';
 import { ProtectedRoute, PublicRoute } from '@/shared/components/navigation';
+import { DashboardLayout } from '@/layouts';
 import { APP_ROUTES } from '@/shared/constants';
-
-// Placeholder Dashboard component
-function Dashboard() {
-  return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Dashboard
-          </h1>
-          <p className="text-gray-600">
-            Dashboard content coming soon...
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // 404 Not Found component
 function NotFound() {
@@ -48,7 +32,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       {/* Root redirect to dashboard */}
-      <Route path="/" element={<Navigate to={APP_ROUTES.DASHBOARD.ROOT} replace />} />
+      <Route path="/" element={<Navigate to={APP_ROUTES.DASHBOARD.PROJECTS} replace />} />
 
       {/* Public routes - redirect to dashboard if authenticated */}
       <Route element={<PublicRoute />}>
@@ -58,8 +42,12 @@ export default function AppRoutes() {
 
       {/* Protected routes - require authentication */}
       <Route element={<ProtectedRoute />}>
-        <Route path={APP_ROUTES.DASHBOARD.ROOT} element={<Dashboard />} />
-        {/* Add more protected routes here */}
+        <Route element={<DashboardLayout><Outlet /></DashboardLayout>}>
+          <Route path={APP_ROUTES.DASHBOARD.ROOT} element={<Navigate to={APP_ROUTES.DASHBOARD.PROJECTS} replace />} />
+          <Route path={APP_ROUTES.DASHBOARD.PROJECTS} element={<ProjectsPage />} />
+          <Route path={`${APP_ROUTES.DASHBOARD.PROJECTS}/:id`} element={<ProjectDetailPage />} />
+          {/* TODO: Add Tasks, Calendar, Settings routes */}
+        </Route>
       </Route>
 
       {/* 404 Not Found */}

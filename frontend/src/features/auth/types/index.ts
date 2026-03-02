@@ -21,6 +21,7 @@ export interface LoginResponse {
 
 export interface User {
   userId: number;
+  id?: number; // Alias for userId for compatibility
   username: string;
   email: string;
   role?: {
