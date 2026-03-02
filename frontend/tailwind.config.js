@@ -22,6 +22,8 @@ export default {
       },
       animation: {
         blob: 'blob 7s infinite',
+        fadeIn: 'fadeIn 0.3s ease-in-out',
+        scaleIn: 'scaleIn 0.2s ease-out',
       },
       keyframes: {
         blob: {
@@ -36,6 +38,24 @@ export default {
           },
           '100%': {
             transform: 'translate(0px, 0px) scale(1)',
+          },
+        },
+        fadeIn: {
+          '0%': {
+            opacity: '0',
+          },
+          '100%': {
+            opacity: '1',
+          },
+        },
+        scaleIn: {
+          '0%': {
+            opacity: '0',
+            transform: 'scale(0.9)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'scale(1)',
           },
         },
       },

@@ -1,6 +1,9 @@
-import { useAuthStore } from '@/stores/useAuthStore';
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useNavigate } from "react-router-dom";
+import { APP_ROUTES } from "@/shared/constants";
 
 export const useAuth = () => {
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
   const refreshToken = useAuthStore((state) => state.refreshToken);
@@ -11,6 +14,11 @@ export const useAuth = () => {
   const setLoading = useAuthStore((state) => state.setLoading);
   const updateUser = useAuthStore((state) => state.updateUser);
   const updateTokens = useAuthStore((state) => state.updateTokens);
+
+  const logout = () => {
+    clearAuth();
+    navigate(APP_ROUTES.AUTH.LOGIN);
+  };
 
   return {
     user,
@@ -23,6 +31,6 @@ export const useAuth = () => {
     setLoading,
     updateUser,
     updateTokens,
+    logout,
   };
 };
-
