@@ -1,16 +1,19 @@
 package com.internalpj.crm_mini.repository;
 
-import com.internalpj.crm_mini.entity.ProjectUser;
-import com.internalpj.crm_mini.entity.ProjectUserId;
-import com.internalpj.crm_mini.entity.enums.ProjectRole;
-import com.internalpj.crm_mini.entity.enums.ProjectUserStatus;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import com.internalpj.crm_mini.entity.ProjectUser;
+import com.internalpj.crm_mini.entity.ProjectUserId;
+import com.internalpj.crm_mini.entity.enums.ProjectRole;
+import com.internalpj.crm_mini.entity.enums.ProjectUserStatus;
 
 /**
  * Repository interface for ProjectUser entity.
@@ -55,6 +58,20 @@ public interface ProjectUserRepository extends JpaRepository<ProjectUser, Projec
         default List<ProjectUser> findActiveMembers(Long projectId) {
                 return findByIdProjectIdAndStatusInProject(projectId, ProjectUserStatus.ACTIVE);
         }
+
+        /**
+         * Find all active members of a project with USER JOIN FETCH.
+         * Prevents N+1 queries when accessing user details.
+         * 
+         * @param projectId the project ID
+         * @return List of active ProjectUser entities with users fetched
+         */
+        @Query("SELECT pu FROM ProjectUser pu " +
+                        "LEFT JOIN FETCH pu.user u " +
+                        "WHERE pu.id.projectId = :projectId " +
+                        "AND pu.statusInProject = 'ACTIVE' " +
+                        "ORDER BY CASE WHEN pu.roleInProject = 'LEADER' THEN 0 ELSE 1 END, pu.joinedAt ASC")
+        List<ProjectUser> findActiveMembersWithUsers(@Param("projectId") Long projectId);
 
         /**
          * Count members by project ID and role.
@@ -123,6 +140,27 @@ public interface ProjectUserRepository extends JpaRepository<ProjectUser, Projec
                         @Param("status") ProjectUserStatus status);
 
         /**
+         * Find all projects where a user is a member with pagination and JOIN FETCH.
+         * Supports dynamic sorting and avoids N+1 queries by fetching project data.
+         * 
+         * @param userId the user ID
+         * @param status the membership status
+         * @param pageable pagination and sorting information
+         * @return Page of ProjectUser entities with projects JOIN FETCHED
+         */
+        @Query(value = "SELECT pu FROM ProjectUser pu " +
+                        "LEFT JOIN FETCH pu.project p " +
+                        "WHERE pu.id.userId = :userId " +
+                        "AND pu.statusInProject = :status",
+               countQuery = "SELECT COUNT(pu) FROM ProjectUser pu " +
+                        "WHERE pu.id.userId = :userId " +
+                        "AND pu.statusInProject = :status")
+        Page<ProjectUser> findByIdUserIdAndStatusInProjectWithPagination(
+                        @Param("userId") Long userId,
+                        @Param("status") ProjectUserStatus status,
+                        Pageable pageable);
+
+        /**
          * Get the role of a user in a project.
          * 
          * @param projectId the project ID
@@ -164,6 +202,28 @@ public interface ProjectUserRepository extends JpaRepository<ProjectUser, Projec
         long countActiveMembersByProjectId(@Param("projectId") Long projectId);
 
         /**
+         * Batch count active members for multiple projects.
+         * Returns a map of projectId -> memberCount to avoid N+1 queries.
+         * 
+         * @param projectIds list of project IDs
+         * @return map of project ID to member count
+         */
+        @Query("SELECT pu.id.projectId as projectId, COUNT(pu) as memberCount " +
+                        "FROM ProjectUser pu " +
+                        "WHERE pu.id.projectId IN :projectIds " +
+                        "AND pu.statusInProject = 'ACTIVE' " +
+                        "GROUP BY pu.id.projectId")
+        List<ProjectMemberCount> batchCountActiveMembersByProjectIds(@Param("projectIds") List<Long> projectIds);
+
+        /**
+         * Projection interface for batch member counting results.
+         */
+        interface ProjectMemberCount {
+                Long getProjectId();
+                Long getMemberCount();
+        }
+
+        /**
          * Find invitation by token.
          * Used for accepting invitations.
          * 
@@ -187,4 +247,121 @@ public interface ProjectUserRepository extends JpaRepository<ProjectUser, Projec
                         "CASE WHEN pu.statusInProject = 'ACTIVE' THEN 0 ELSE 1 END, " +
                         "pu.joinedAt ASC")
         List<ProjectUser> findByProjectIdIncludingPending(@Param("projectId") Long projectId);
+
+        // ========== REUSABLE MEMBER QUERIES ==========
+
+        /**
+         * REUSABLE: Find members by project and multiple statuses with JOIN FETCH.
+         * Can be used by both MemberService and ProjectService.
+         * Prevents N+1 queries by fetching user data.
+         * 
+         * @param projectId the project ID
+         * @param statuses the list of statuses to include
+         * @return List of ProjectUser entities with users fetched
+         */
+        @Query("SELECT pu FROM ProjectUser pu " +
+                        "LEFT JOIN FETCH pu.user u " +
+                        "WHERE pu.id.projectId = :projectId " +
+                        "AND pu.statusInProject IN :statuses " +
+                        "ORDER BY CASE WHEN pu.roleInProject = 'LEADER' THEN 0 ELSE 1 END, " +
+                        "CASE WHEN pu.statusInProject = 'ACTIVE' THEN 0 ELSE 1 END, " +
+                        "pu.joinedAt ASC")
+        List<ProjectUser> findMembersWithUsersByProjectIdAndStatuses(
+                        @Param("projectId") Long projectId,
+                        @Param("statuses") List<ProjectUserStatus> statuses);
+
+        /**
+         * REUSABLE: Find members with pagination and JOIN FETCH.
+         * Supports flexible status filtering and dynamic sorting.
+         * 
+         * @param projectId the project ID
+         * @param statuses the list of statuses to include  
+         * @param pageable pagination and sorting information
+         * @return Page of ProjectUser entities with users fetched
+         */
+        @Query(value = "SELECT pu FROM ProjectUser pu " +
+                        "LEFT JOIN FETCH pu.user u " +
+                        "WHERE pu.id.projectId = :projectId " +
+                        "AND pu.statusInProject IN :statuses",
+               countQuery = "SELECT COUNT(pu) FROM ProjectUser pu " +
+                        "WHERE pu.id.projectId = :projectId " +
+                        "AND pu.statusInProject IN :statuses")
+        Page<ProjectUser> findMembersWithUsersByProjectIdAndStatusesWithPagination(
+                        @Param("projectId") Long projectId,
+                        @Param("statuses") List<ProjectUserStatus> statuses,
+                        Pageable pageable);
+
+        /**
+         * REUSABLE: Get comprehensive member statistics in a single query.
+         * Returns all statistics needed by both services.
+         * 
+         * @param projectId the project ID
+         * @return Member statistics projection
+         */
+        @Query("SELECT " +
+                        "COUNT(*) as totalMembers, " +
+                        "SUM(CASE WHEN pu.statusInProject = 'ACTIVE' THEN 1 ELSE 0 END) as activeCount, " +
+                        "SUM(CASE WHEN pu.statusInProject = 'PENDING' THEN 1 ELSE 0 END) as pendingCount, " +
+                        "SUM(CASE WHEN pu.statusInProject = 'INACTIVE' THEN 1 ELSE 0 END) as inactiveCount, " +
+                        "SUM(CASE WHEN pu.roleInProject = 'LEADER' AND pu.statusInProject = 'ACTIVE' THEN 1 ELSE 0 END) as activeLeaderCount, " +
+                        "SUM(CASE WHEN pu.roleInProject = 'MEMBER' AND pu.statusInProject = 'ACTIVE' THEN 1 ELSE 0 END) as activeMemberCount, " +
+                        "SUM(CASE WHEN pu.roleInProject = 'VIEWER' AND pu.statusInProject = 'ACTIVE' THEN 1 ELSE 0 END) as activeViewerCount " +
+                        "FROM ProjectUser pu WHERE pu.id.projectId = :projectId")
+        MemberStatistics getMemberStatistics(@Param("projectId") Long projectId);
+
+        /**
+         * REUSABLE: Projection interface for member statistics.
+         * Contains all statistics needed by services.
+         */
+        interface MemberStatistics {
+                Long getTotalMembers();
+                Long getActiveCount();
+                Long getPendingCount();
+                Long getInactiveCount();
+                Long getActiveLeaderCount();
+                Long getActiveMemberCount();
+                Long getActiveViewerCount();
+        }
+
+        /**
+         * REUSABLE: Search members by username/email with flexible filters.
+         * Can be used for member search functionality.
+         * 
+         * @param projectId the project ID
+         * @param searchTerm the search term (username or email)
+         * @param statuses the list of statuses to include
+         * @param roleFilter optional role filter
+         * @param pageable pagination and sorting
+         * @return Page of matching ProjectUser entities
+         */
+        @Query(value = "SELECT pu FROM ProjectUser pu " +
+                        "LEFT JOIN FETCH pu.user u " +
+                        "WHERE pu.id.projectId = :projectId " +
+                        "AND pu.statusInProject IN :statuses " +
+                        "AND (:roleFilter IS NULL OR pu.roleInProject = :roleFilter) " +
+                        "AND (LOWER(u.username) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+                        "     LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')))",
+               countQuery = "SELECT COUNT(pu) FROM ProjectUser pu " +
+                        "JOIN pu.user u " +
+                        "WHERE pu.id.projectId = :projectId " +
+                        "AND pu.statusInProject IN :statuses " +
+                        "AND (:roleFilter IS NULL OR pu.roleInProject = :roleFilter) " +
+                        "AND (LOWER(u.username) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+                        "     LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+        Page<ProjectUser> searchMembersWithUsers(
+                        @Param("projectId") Long projectId,
+                        @Param("searchTerm") String searchTerm,
+                        @Param("statuses") List<ProjectUserStatus> statuses,
+                        @Param("roleFilter") ProjectRole roleFilter,
+                        Pageable pageable);
+
+        // ========== CONVENIENCE METHODS USING REUSABLE QUERIES ==========
+
+        /**
+         * CONVENIENCE: Get active + pending members (wraps reusable method).
+         */
+        default List<ProjectUser> findActivePendingMembersWithUsers(Long projectId) {
+                return findMembersWithUsersByProjectIdAndStatuses(projectId,
+                        List.of(ProjectUserStatus.ACTIVE, ProjectUserStatus.PENDING));
+        }
 }

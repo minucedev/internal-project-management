@@ -1,16 +1,17 @@
 package com.internalpj.crm_mini.mapper;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import com.internalpj.crm_mini.dto.response.MemberDetailResponse;
 import com.internalpj.crm_mini.dto.response.MemberListResponse;
 import com.internalpj.crm_mini.dto.response.MemberResponse;
 import com.internalpj.crm_mini.entity.ProjectUser;
 import com.internalpj.crm_mini.entity.enums.ProjectRole;
-import com.internalpj.crm_mini.dto.response.MemberDetailResponse;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * MapStruct mapper for converting between ProjectUser entities and Member DTOs.
@@ -59,9 +60,13 @@ public interface MemberMapper {
         List<MemberDetailResponse> toDetailResponseList(List<ProjectUser> projectUsers);
 
         /**
-         * Convert list of ProjectUser entities to MemberListResponse DTO.
+         * LEGACY: Convert list of ProjectUser entities to MemberListResponse DTO.
          * This method includes custom logic for calculating statistics.
+         * 
+         * @deprecated Use repository-level statistics instead for better performance.
+         *             This method processes data multiple times in memory.
          */
+        @Deprecated
         default MemberListResponse toListResponse(List<ProjectUser> projectUsers) {
                 List<MemberResponse> members = toResponseList(projectUsers);
 
@@ -89,6 +94,19 @@ public interface MemberMapper {
                                 .leaderCount(roleCounts.getOrDefault(ProjectRole.LEADER, 0L))
                                 .memberCount(roleCounts.getOrDefault(ProjectRole.MEMBER, 0L))
                                 .viewerCount(roleCounts.getOrDefault(ProjectRole.VIEWER, 0L))
+                                .build();
+        }
+
+        /**
+         * NEW: Simple conversion without statistics calculation.
+         * Use this when statistics are provided separately via repository queries.
+         */
+        default MemberListResponse toListResponseSimple(List<ProjectUser> projectUsers) {
+                List<MemberResponse> members = toResponseList(projectUsers);
+
+                return MemberListResponse.builder()
+                                .members(members)
+                                .totalMembers((long) members.size())
                                 .build();
         }
 }

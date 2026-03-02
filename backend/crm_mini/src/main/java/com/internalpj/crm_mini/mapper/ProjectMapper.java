@@ -1,19 +1,20 @@
 package com.internalpj.crm_mini.mapper;
 
-import com.internalpj.crm_mini.dto.request.ProjectCreateRequest;
-import com.internalpj.crm_mini.dto.request.ProjectUpdateRequest;
-import com.internalpj.crm_mini.dto.response.ProjectDetailResponse;
-import com.internalpj.crm_mini.dto.response.ProjectResponse;
-import com.internalpj.crm_mini.dto.response.MemberResponse;
-import com.internalpj.crm_mini.entity.Project;
-import com.internalpj.crm_mini.entity.enums.ProjectRole;
+import java.util.List;
+
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-import java.util.List;
+import com.internalpj.crm_mini.dto.request.ProjectCreateRequest;
+import com.internalpj.crm_mini.dto.request.ProjectUpdateRequest;
+import com.internalpj.crm_mini.dto.response.MemberResponse;
+import com.internalpj.crm_mini.dto.response.ProjectDetailResponse;
+import com.internalpj.crm_mini.dto.response.ProjectResponse;
+import com.internalpj.crm_mini.entity.Project;
+import com.internalpj.crm_mini.entity.enums.ProjectRole;
 
 /**
  * MapStruct mapper for converting between Project entities and DTOs.

@@ -1,11 +1,22 @@
 package com.internalpj.crm_mini.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.internalpj.crm_mini.common.ApiResponse;
 import com.internalpj.crm_mini.dto.request.InviteMemberRequest;
 import com.internalpj.crm_mini.dto.response.InviteResponse;
 import com.internalpj.crm_mini.dto.response.MemberDetailResponse;
 import com.internalpj.crm_mini.dto.response.MemberListResponse;
 import com.internalpj.crm_mini.service.MemberService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,8 +24,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 /**
  * REST controller for managing project members with invitation system.
@@ -85,10 +94,13 @@ public class MemberController {
         })
         public ResponseEntity<ApiResponse<MemberListResponse>> getMembers(
                         @Parameter(description = "Project ID", required = true) @PathVariable Long projectId,
-                        @Parameter(description = "Include pending invitations (LEADER only)", required = false) @RequestParam(defaultValue = "false") boolean includePending) {
+                        @Parameter(description = "Include pending invitations (LEADER only)", required = false) @RequestParam(defaultValue = "false") boolean includePending,
+                        @Parameter(description = "Page number (0-indexed)", required = false) @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Page size", required = false) @RequestParam(defaultValue = "20") int size,
+                        @Parameter(description = "Sort field (username, email, role, joinedAt)", required = false) @RequestParam(defaultValue = "joinedAt") String sortBy) {
 
                 return ResponseEntity.ok(
-                                ApiResponse.success(memberService.getMembers(projectId, includePending)));
+                                ApiResponse.success(memberService.getMembers(projectId, includePending, page, size, sortBy)));
         }
 
         /**
