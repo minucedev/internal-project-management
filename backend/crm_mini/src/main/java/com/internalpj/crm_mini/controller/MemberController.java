@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
  * REST controller for managing project members with invitation system.
  */
 @RestController
-@RequestMapping("/api/v1/projects/{projectId}/members")
+@RequestMapping("/api/projects/{projectId}/members")
 @Tag(name = "Member Management", description = "APIs for managing project members via invitations")
 @SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor

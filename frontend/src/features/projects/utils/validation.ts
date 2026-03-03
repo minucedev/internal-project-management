@@ -24,4 +24,11 @@ export const inviteMemberSchema = z.object({
     .string()
     .min(1, "Email không được để trống")
     .email("Email không hợp lệ"),
+  role: z.enum(['LEADER', 'MEMBER', 'VIEWER']).default('MEMBER'),
+  positionTitle: z
+    .string()
+    .max(100, "Chức vụ không được quá 100 ký tự")
+    .optional()
+    .or(z.literal("")),
 });
+

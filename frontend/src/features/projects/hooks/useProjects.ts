@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { projectsApi } from "../api";
+import type { GetProjectsParams } from "../types";
 
-export const useProjects = (search?: string) => {
+export const useProjects = (params?: GetProjectsParams) => {
   return useQuery({
-    queryKey: ["projects", search],
-    queryFn: () => projectsApi.getAll({ search }),
+    queryKey: ["projects", params],
+    queryFn: () => projectsApi.getAll(params),
   });
 };

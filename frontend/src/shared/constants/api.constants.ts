@@ -13,11 +13,14 @@ export const API_ENDPOINTS = {
   },
   PROJECTS: {
     BASE: '/projects',
+    TRASHED: '/projects/trashed',
     DETAIL: (id: string) => `/projects/${id}`,
+    RESTORE: (id: string) => `/projects/${id}/restore`,
     MEMBERS: (id: string) => `/projects/${id}/members`,
     INVITE: (id: string) => `/projects/${id}/members/invite`,
     ACCEPT_INVITE: (id: string, token: string) => `/projects/${id}/members/invites/${token}/accept`,
   },
+
   TASKS: {
     BASE: '/tasks',
     DETAIL: (id: string) => `/tasks/${id}`,

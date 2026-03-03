@@ -1,0 +1,1 @@
+export { TrashedProjectsDrawer } from './TrashedProjectsDrawer';

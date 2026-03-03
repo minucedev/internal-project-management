@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
  * Handles CRUD operations for projects.
  */
 @RestController
-@RequestMapping("/api/v1/projects")
+@RequestMapping("/api/projects")
 @Tag(name = "Project Management", description = "APIs for managing projects including creation, listing, and detailed views")
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {

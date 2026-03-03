@@ -15,7 +15,7 @@ export const useCreateProject = () => {
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Tạo dự án thành công!");
-      navigate(APP_ROUTES.DASHBOARD.PROJECT_DETAIL(project.id));
+      navigate(APP_ROUTES.DASHBOARD.PROJECT_DETAIL(String(project.id)));
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
