@@ -96,6 +96,11 @@ public class NotFoundException extends BusinessException {
      * @param identifier   the resource identifier
      * @return NotFoundException with custom message
      */
+    public static NotFoundException task(Long taskId) {
+        return new NotFoundException(ErrorCode.TASK_NOT_FOUND,
+                String.format("Task not found with ID: %d", taskId));
+    }
+
     public static NotFoundException resource(String resourceType, String identifier) {
         return new NotFoundException(ErrorCode.RESOURCE_NOT_FOUND,
                 String.format("%s not found: %s", resourceType, identifier));
