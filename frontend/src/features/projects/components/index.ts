@@ -3,4 +3,4 @@ export { ProjectFormModal } from "./ProjectFormModal";
 export { MemberTable } from "./MemberTable";
 export { InviteMemberModal } from "./InviteMemberModal";
 export { TrashedProjectsDrawer } from "./TrashedProjectsDrawer";
-
+export { TaskBoard } from "./TaskBoard";

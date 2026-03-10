@@ -11,3 +11,5 @@ export { useInviteMember } from "./useInviteMember";
 export { useMembers } from "./useMembers";
 export { useRemoveMember } from "./useRemoveMember";
 export { useAcceptInvite } from "./useAcceptInvite";
+export { useTasks, useTaskDetail, useCreateTask, useUpdateTask, useChangeStatus, useAssignTask, useDeleteTask } from "./useTasks";
+export { useTaskPermission } from "./useTaskPermission";
